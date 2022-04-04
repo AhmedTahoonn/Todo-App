@@ -4,9 +4,12 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:noteeee/provider/cuibt.dart';
+import 'package:noteeee/styles/icon_broken.dart';
 
+import '../../provider/states.dart';
 import '../archived_tasks/Archived.dart';
 import '../done_tasks/Done.dart';
 import '../new_tasks/New.dart';
@@ -18,11 +21,11 @@ class layout extends StatefulWidget {
 
 class _layoutState extends State<layout> with SingleTickerProviderStateMixin {
   late TabController tabController;
-  List<Tab>myTabs=[
+  List<Tab>myTabs=
+  [
     Tab(text: 'Tasks',),
     Tab(text: 'Done',),
     Tab(text: 'archive',),
-
   ];
   var scaffoldKey=GlobalKey<ScaffoldState>();
   var titleController=TextEditingController();
@@ -30,9 +33,6 @@ class _layoutState extends State<layout> with SingleTickerProviderStateMixin {
   var dateController=TextEditingController();
   var formKey=GlobalKey<FormState>();
   bool isBottomSheetShown=false;
-  IconData fabIcon=Icons.edit;
-
-
   List<String> mainTitleNames=[
   'Tasks',
   'Done',
@@ -50,355 +50,240 @@ super.dispose();
   }
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      key: scaffoldKey,
-      floatingActionButton: FloatingActionButton(
-        onPressed: (){
-          if(isBottomSheetShown)
-          {
-            if(formKey.currentState!.validate())
-            {
-              Todo_cuibt.get(context).InsertDatabase(title: titleController.text, time: timeController.text, date: dateController.text);
-              Navigator.pop(context);
-              titleController.text='';
-              timeController.text='';
-              dateController.text='';
+    return BlocConsumer<Todo_cuibt,TodoStates>(
+      builder: (context, state) {
+        return Scaffold(
+          key: scaffoldKey,
+          floatingActionButton: FloatingActionButton(
+            onPressed: (){
+              if(isBottomSheetShown)
+              {
+                if(formKey.currentState!.validate())
+                {
+                  Todo_cuibt.get(context).InsertDatabase(title: titleController.text, time: timeController.text, date: dateController.text);
+                  Navigator.pop(context);
+                  titleController.text='';
+                  timeController.text='';
+                  dateController.text='';
 
-            }
+                }
 
-          }else {
-            scaffoldKey.currentState!.showBottomSheet((context) =>
-                Container(
-                  padding: EdgeInsets.all(20.0),
-                  child: Form(
-                    key: formKey,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children:
-                      [
-                        TextFormField(
-                          validator: (value) {
-                            if (value!.isEmpty) {
-                              return 'title can not be empty';
-                            }
-                            return null;
-                          },
-                          controller: titleController,
-                          keyboardType: TextInputType.text,
-                          decoration: InputDecoration(
-                            border: OutlineInputBorder(),
-                            labelText: "Tasks Title",
-                            prefixIcon: Icon(Icons.title),
-                          ),
+              }else {
+                scaffoldKey.currentState!.showBottomSheet((context) =>
+                    Container(
+                      padding: EdgeInsets.all(20.0),
+                      child: Form(
+                        key: formKey,
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children:
+                          [
+                            TextFormField(
+                              validator: (value) {
+                                if (value!.isEmpty) {
+                                  return 'Title can\'t be empty';
+                                }
+                                return null;
+                              },
+                              controller: titleController,
+                              keyboardType: TextInputType.text,
+                              decoration: InputDecoration(
+                                border: OutlineInputBorder(),
+                                labelText: "Task Title",
+                                labelStyle: TextStyle(
+                                  fontStyle: FontStyle.italic,
+
+                                ),
+                                prefixIcon: Icon(IconBroken.Work),
+                              ),
+                            ),
+                            SizedBox(
+                              height: 10,
+                            ),
+                            TextFormField(
+                              controller: timeController,
+                              validator: (value) {
+                                if (value!.isEmpty) {
+                                  return 'Time can\'t be empty';
+                                }
+                                return null;
+                              },
+                              keyboardType: TextInputType.text,
+                              onTap: () {
+                                showTimePicker(context: context,
+                                    initialTime: TimeOfDay.now()).then((
+                                    value) {
+                                  timeController.text =
+                                      value!.format(context).toString();
+                                }).catchError((error) {
+
+
+                                });
+                              },
+                              decoration: InputDecoration(
+                                border: OutlineInputBorder(),
+                                labelStyle: TextStyle(
+                                  fontStyle: FontStyle.italic,
+
+
+                                ),
+
+                                labelText: "Task Time",
+                                prefixIcon: Icon(IconBroken.Time_Circle),
+                              ),
+                            ),
+                            SizedBox(
+                              height: 10,
+                            ),
+                            TextFormField(
+                              controller: dateController,
+                              validator: (value) {
+                                if (value!.isEmpty) {
+                                  return 'Date can\'t be empty';
+                                }
+                                return null;
+                              },
+                              onTap: () {
+                                showDatePicker(context: context,
+                                    initialDate: DateTime.now(),
+                                    firstDate: DateTime.now(),
+                                    lastDate: DateTime.parse('2022-05-04'))
+                                    .then((value) {
+                                  dateController.text =
+                                      DateFormat.yMMMd().format(value!);
+                                }).catchError((error) {
+
+                                });
+                              },
+                              keyboardType: TextInputType.datetime,
+                              decoration: InputDecoration(
+                                border: OutlineInputBorder(),
+                                labelText: "Task Date",
+                                labelStyle: TextStyle(
+                                  fontStyle: FontStyle.italic,
+
+                                ),
+
+                                prefixIcon: Icon(IconBroken.Calendar),
+                              ),
+                            ),
+
+                          ],
                         ),
-                        SizedBox(
-                          height: 10,
-                        ),
-                        TextFormField(
-                          controller: timeController,
-                          validator: (value) {
-                            if (value!.isEmpty) {
-                              return 'time can not be empty';
-                            }
-                            return null;
-                          },
-                          keyboardType: TextInputType.text,
-                          onTap: () {
-                            showTimePicker(context: context,
-                                initialTime: TimeOfDay.now()).then((
-                                value) {
-                              timeController.text =
-                                  value!.format(context).toString();
-                            }).catchError((error) {
-
-
-                            });
-                          },
-                          decoration: InputDecoration(
-                            border: OutlineInputBorder(),
-                            labelText: "Tasks Time",
-                            prefixIcon: Icon(Icons.timelapse),
-                          ),
-                        ),
-                        SizedBox(
-                          height: 10,
-                        ),
-                        TextFormField(
-                          controller: dateController,
-                          validator: (value) {
-                            if (value!.isEmpty) {
-                              return 'date can not be empty';
-                            }
-                            return null;
-                          },
-                          onTap: () {
-                            showDatePicker(context: context,
-                                initialDate: DateTime.now(),
-                                firstDate: DateTime.now(),
-                                lastDate: DateTime.parse('2022-05-04'))
-                                .then((value) {
-                              dateController.text =
-                                  DateFormat.yMMMd().format(value!);
-                            }).catchError((error) {
-
-                            });
-                          },
-                          keyboardType: TextInputType.datetime,
-                          decoration: InputDecoration(
-                            border: OutlineInputBorder(),
-                            labelText: "Tasks Date",
-                            prefixIcon: Icon(Icons.date_range),
-                          ),
-                        ),
-
-                      ],
+                      ),
                     ),
+                ).closed.then((value) {
+                  setState(() {
+                    isBottomSheetShown=false;
+
+                  });
+                });
+                setState(() {
+                  isBottomSheetShown=true;
+
+                });
+              }
+            },
+            child: isBottomSheetShown?Icon(IconBroken.Plus):Icon(IconBroken.Edit),
+          ),
+
+          appBar: AppBar(
+            elevation: 0.0,
+            automaticallyImplyLeading: false,
+            title: Image(
+              image: AssetImage('assets/images/logo1.png'),
+              height: 55,
+              width: 55,
+            ),
+            actions: [
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: IconButton(icon: Todo_cuibt.get(context).isdark?Icon(Icons.wb_sunny,color: Colors.white,):Icon(Icons.nightlight_round,color: Colors.black,),onPressed: (){
+
+                  Todo_cuibt.get(context).changeAppMode();
+                },),
+              ),
+            ],
+          ),
+
+          body: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children:
+              [
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text('Today',style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w600,
+                    fontStyle: FontStyle.italic,
+
+                  ),),
+                ),
+                Container(
+                  child: DatePicker(
+                    DateTime.now(),
+                    dayTextStyle: TextStyle(
+                      color: Colors.blueGrey,
+                    ),
+                    monthTextStyle: TextStyle(
+                      color: Colors.blueGrey,
+                    ),
+                    height: 120,
+                    width: 90,
+                    initialSelectedDate: DateTime.now(),
+                    selectionColor: Colors.blueGrey,
+                    selectedTextColor: Colors.white,
+                    dateTextStyle: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.grey,
+                    ),
+
                   ),
                 ),
-            ).closed.then((value) {
-              isBottomSheetShown=false;
-            });
-            isBottomSheetShown=true;
-          }
-        },
-        child: Icon(Icons.add),
-      ),
+                Column(
+                  children: [
+                    TabBar(
+                        controller: tabController,
+                        indicatorSize: TabBarIndicatorSize.label,
+                        indicatorColor: Colors.grey,
+                        unselectedLabelColor: Colors.blueGrey,
+                        labelStyle: TextStyle(
+                          fontSize: 15,
+                          fontStyle: FontStyle.italic,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        labelColor: Colors.grey,
+                        tabs:
+                        [
 
-      appBar: AppBar(
-        elevation: 0.0,
-        leading: Icon(Icons.menu,),
-        title: Text('Todo App',style: TextStyle(
-          fontSize: 20,
-          fontWeight: FontWeight.bold,
-        ),),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: IconButton(icon: Icon( Todo_cuibt.get(context).isdark?Icons.wb_sunny_rounded:Icons.nightlight_round),onPressed: (){
-              Todo_cuibt.get(context).changeAppMode();
-            },),
-          ),
-        ],
-      ),
+                          Tab(text: 'Tasks',),
+                          Tab(text: 'Done',),
+                          Tab(text: 'Archive',),
+                        ]),
+                  ],
+                ),
+                Flexible(child: TabBarView(
+                    controller: tabController,
+                    children: [
+                      New_tasks(),
+                      Done_tasks(),
+                      Archives_tasks(),
 
-      body: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children:
-          [
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Text('Today',style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),),
-            ),
-            Container(
-              child: DatePicker(
-                DateTime.now(),
-                dayTextStyle: TextStyle(
-                  color: Colors.blueGrey,
+                    ]
                 ),
-                monthTextStyle: TextStyle(
-                  color: Colors.blueGrey,
                 ),
-                height: 120,
-                width: 90,
-                initialSelectedDate: DateTime.now(),
-                selectionColor: Colors.blueGrey,
-                selectedTextColor: Colors.white,
-                dateTextStyle: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.grey,
-                ),
-
-              ),
-            ),
-            Column(
-              children: [
-                TabBar(
-                  controller: tabController,
-                    indicatorSize: TabBarIndicatorSize.label,
-                    indicatorColor: Colors.grey,
-                    unselectedLabelColor: Colors.blueGrey,
-                    labelStyle: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    labelColor: Colors.grey,
-                    tabs: [
-                      Tab(text: 'Tasks',),
-                      Tab(text: 'Done',),
-                      Tab(text: 'archive',),
-                ]),
               ],
             ),
-            Flexible(child: TabBarView(
-              controller: tabController,
-                children: [
-                  New_tasks(),
-                  Done_tasks(),
-                  Archives_tasks(),
-
-                ]
-            ),
-            ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
+      listener: (context, state) {
+      },
     );
   }
 }
-Widget itemBuilder()=>Scaffold(
-  appBar: AppBar(
-    backgroundColor: Colors.white.withOpacity(0.4),
-    elevation: 0.0,
-    leading: Icon(Icons.menu,color: Colors.black,),
-    title: Text('Todo App',style: TextStyle(
-      color: Colors.black,
-      fontSize: 20,
-      fontWeight: FontWeight.bold,
-    ),),
-    actions: [
 
-    ],
-  ),
-  floatingActionButton: FloatingActionButton(
-    onPressed: (){},child: Text('save'),
-  ),
-  body: Padding(
-    padding: const EdgeInsets.all(8.0),
-    child: Column(
-      children:
-      [
-        Container(
-          width: 135,
-          height: 175,
-          decoration: BoxDecoration(
-            color: Colors.blueGrey,
-            borderRadius: BorderRadius.all(Radius.circular(20)),
-          ),
-          child: ListTile(
-            title: Column(
-              mainAxisSize: MainAxisSize.max,
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children:
-              [
-                Align( alignment: Alignment.topLeft,
-                    child: Text('Note',style: TextStyle(
-                        color: Colors.white
-                    ),)),
-                SizedBox(),
-                Align( alignment: Alignment.topLeft,
-                    child: Text('12345',style: TextStyle(
-                        color: Colors.white
-                    ))),
-
-              ],
-            ),
-          ),
-        ),
-      ],
-    ),
-  ),
-);
-Widget buildtasksItem(Map model,context)=>Dismissible(
-  background: Container(
-    alignment: Alignment.centerLeft,
-    padding: EdgeInsets.symmetric(horizontal: 20),
-    color: Colors.red,
-    child: Icon(Icons.delete_forever,color: Colors.white,size: 32,),
-  ),
-  secondaryBackground: Container(
-    alignment: Alignment.centerRight,
-    padding: EdgeInsets.symmetric(horizontal: 20),
-    color: Colors.red,
-    child: Icon(Icons.delete_forever,color: Colors.white,size: 32,),
-  ),
-  key: Key(model['id'].toString()),
-  onDismissed: (direction){
-    Todo_cuibt.get(context).DeleteDatabase(id: model['id']);
-  },
-  child:Padding(
-
-    padding: const EdgeInsets.all(10.0),
-
-    child: Row(
-
-      children:
-
-      [
-
-        CircleAvatar(
-
-          radius: 40.0,
-
-          child: Text('${model['time']}'),
-
-        ),
-
-        SizedBox(
-
-          width: 20.0,
-
-        ),
-
-        Expanded(
-
-          child: Column(
-
-            crossAxisAlignment: CrossAxisAlignment.start,
-
-            mainAxisSize: MainAxisSize.min,
-
-            children:
-
-            [
-
-              Text('${model['title']}',
-
-                style: Theme.of(context).textTheme.bodyText1,
-
-              ),
-              SizedBox(
-                height: 5,
-              ),
-              Text('${model['date']}',
-
-                style: Theme.of(context).textTheme.bodyText2,
-
-              ),
-
-
-
-            ],
-
-          ),
-
-        ),
-
-        IconButton(onPressed: (){
-
-          Todo_cuibt.get(context).updateDatabase(status: 'done', id: model['id']);
-
-        }, icon: Icon(Icons.check_box,color: Colors.green,)),
-
-        IconButton(onPressed: (){
-
-          Todo_cuibt.get(context).updateDatabase(status: 'archive', id: model['id']);
-
-
-
-        }, icon: Icon(Icons.archive,color: Colors.black45,)),
-
-
-
-      ],
-
-    ),
-
-  ),
-);

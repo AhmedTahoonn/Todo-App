@@ -1,5 +1,6 @@
 import 'package:bloc/bloc.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:noteeee/modules/archived_tasks/Archived.dart';
 import 'package:noteeee/modules/done_tasks/Done.dart';
@@ -12,6 +13,8 @@ class Todo_cuibt extends Cubit<TodoStates> {
 
   static Todo_cuibt get(context) => BlocProvider.of(context);
   var currentIndex = 0;
+  IconData fabIcon=Icons.edit;
+
   List <Widget> screens =
   [
     New_tasks(),
@@ -134,6 +137,7 @@ class Todo_cuibt extends Cubit<TodoStates> {
   {
     isdark=!isdark;
     emit(AppModeChangeState());
+    print(isdark);
   }
   //////////////////////////////////////////////////////////////////////////////
 

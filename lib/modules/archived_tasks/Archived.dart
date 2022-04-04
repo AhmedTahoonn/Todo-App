@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:noteeee/provider/cuibt.dart';
 import 'package:noteeee/provider/states.dart';
 
+import '../../constant/constant.dart';
 import '../home_layout/layout.dart';
 
 class Archives_tasks extends StatelessWidget {
@@ -12,7 +13,8 @@ class Archives_tasks extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<Todo_cuibt,TodoStates>(
-      listener: (context, state) {
+      listener: (context, state)
+      {
 
       },
       builder: (context, state) {
@@ -38,14 +40,15 @@ class Archives_tasks extends StatelessWidget {
                   Icon(
                     Icons.menu,
                     size: 100,
-                    color: Colors.grey,
+                    color: Colors.blueGrey,
 
                   ),
                   Text('Not Tasks Yet ,PLEASE ADD SOME TASKS',
                     style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.grey
+                        fontSize: 15,
+                        fontWeight: FontWeight.w500,
+                        fontStyle: FontStyle.italic,
+                        color: Colors.blueGrey
                     ),
                   ),
                 ],
